@@ -3,8 +3,8 @@ _Gilbert François Duivesteijn_
 
 ## Abstract
 
-This program tries to solve your sudoku. It reads the initial state from a file and when
-it finds a solution, it prints the final state to the terminal.
+This a terminal application that tries to solve your sudoku puzzle. It reads the initial state from a file and when
+it finds a solution, it prints the final state to the terminal. Note: the console output is VT100 compatible :)
 
 
 ## Installation and running
@@ -23,6 +23,8 @@ where filename points to the input file. Options are:
 | -h      | Shows help message and exits.|
 | -s / --max-steps | Maximum number of steps to solve the puzzle. Default = 10000.  |
 | -v / --verbose   | Verbose output, showing history and elapsed computational time.|
+
+![Screenshot](resources/images/screenshot.png)
 
 ## Data file format
 
@@ -55,3 +57,6 @@ The list format consists of a list with digits and its position as `row col digi
 (.... etc)
 
 ```
+
+
+
