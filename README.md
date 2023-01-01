@@ -14,7 +14,7 @@ Install python version 3.10 or higher. The program does not need any other depen
 Run the program with:
 
 ```sh
-python sudoku <filename>
+python sudoku [options] <filename>
 ```
 where filename points to the input file. Options are:
 
@@ -29,7 +29,7 @@ where filename points to the input file. Options are:
 ## Data file format
 
 The input file can have 2 different formats: grid format or list format. The grid format
-expects the digits in 9 by 9 grid, where the empty cells are denoted by a `.`. 
+expects the digits in 9 by 9 grid, where the empty cells are denoted by a dot. 
 
 ```
 .9. .1. ..7
@@ -57,6 +57,5 @@ The list format consists of a list with digits and its position as `row col digi
 (.... etc)
 
 ```
-
-
+There are some example data files in the `examples` folder.
 
