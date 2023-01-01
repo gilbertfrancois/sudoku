@@ -315,7 +315,7 @@ if __name__ == "__main__":
     sudoku.message_line("start")
     print(sudoku)
     status = sudoku.solve()
-    if status:
+    if not status:
         print(sudoku.message_line("warning"))
         print("Unable to find a solution.")
     print(sudoku.message_line("solution"))
