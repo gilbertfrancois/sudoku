@@ -5,11 +5,18 @@ _Gilbert François Duivesteijn_
 
 This a terminal application that tries to solve your sudoku puzzle. It reads the initial state from a file and when
 it finds a solution, it prints the final state to the terminal. Note: the console output is VT100 compatible :)
+The implemented methods to solve the sudoku puzzles are not sophisticated yet. It is based on counting probabitities 
+and doing permutations when there are no deterministic solutions possible. The application in its current state can
+solve the _easy_ and _medium_ levels without problems. The _hard_ level is possible too, but it might need multiple runs
+to converge. In the near future, I'll plan to implement more advanced ways to solve the puzzles, which hopefully allows 
+the machine to solve the most difficult puzzles as well.
 
 
 ## Installation and running
 
-Install python version 3.10 or higher. The program does not need any other dependencies.
+Install python version 3.10 or higher. It was a explicit choice to write the program in plain python, without any 
+external libraries, like numpy. Although it could be much more efficient with numpy, the code looks much closer to a
+plain C implementation, which I'm planning to do when the python implementation is stable.
 
 Run the program with:
 
