@@ -19,6 +19,8 @@ import math
 import os
 import time
 
+from typing import Optional
+
 
 class Sudoku:
     """
@@ -112,10 +114,18 @@ class Sudoku:
         self.chrono = toc - tic
         return _status
 
-    def reset(self):
+    def reset(self, numbers: Optional[list[tuple[int, int, int]]]=None):
         """
         Resets the puzzle to its initial state and clears the history.
+
+        Parameters
+        ----------
+        numbers: list[tuple[int, int, int]] or None
+            List with tuples, where every tuple denotes the (row, col, digit).
+
         """
+        if numbers is not None:
+            self.numbers = numbers
         if self.verbose:
             print("reset")
         self.grid = self._make_2d_grid()
@@ -154,7 +164,7 @@ class Sudoku:
         line = line + "-" * (80 - len(line)) + "\n"
         return line
 
-    def _solve(self, depth) -> bool:
+    def _solve(self, depth: int) -> bool:
         """
         Recursive function. It searches for an empty cell and
         fills in the first possible digit. Then it calls itself
@@ -162,6 +172,11 @@ class Sudoku:
         fill in a possible digit, it unrolls to the point where it can
         try another digit and starts recursing again from this
         point.
+
+        Parameters
+        ----------
+        depth: int
+            Recursive depth, used for verbose output only.
 
         Returns
         -------
@@ -230,28 +245,15 @@ class Sudoku:
             _total_sum += row_sum
         return _status, _total_sum
 
-    def _make_2d_grid(self):
+    def _make_2d_grid(self) -> list[list[int]]:
         grid = [[0 for _ in range(self.dim2)] for _ in range(self.dim2)]
         return grid
-
-    def _prefill_numbers(self, numbers: list[tuple[int, int, int]]) -> None:
-        """
-        Set the initial state of the digits.
-
-        Parameters
-        ----------
-        numbers: list[tuple[int, int, int]]
-            List with tuples, where every tuple denotes the (row, col, digit).
-
-        """
-        self.numbers = numbers
-        self.reset()
 
     def _str_3_to_numbers(self, data):
         numbers = []
         for line in data:
             numbers.append((int(line[0] - 1), int(line[1] - 1), int(line[2])))
-        self._prefill_numbers(numbers)
+        self.reset(numbers)
 
     def _str_9_to_numbers(self, data):
         numbers = []
@@ -261,7 +263,7 @@ class Sudoku:
                 if value in [".", "0", "_", "-", "x"]:
                     continue
                 numbers.append((row, col, int(value)))
-        self._prefill_numbers(numbers)
+        self.reset(numbers)
 
     def _clean_input_data(self, data: list[str] | str) -> list[str]:
         if isinstance(data, str):
