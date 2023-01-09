@@ -97,19 +97,6 @@ class Sudoku:
         elif len(data[0]) == 9:
             self._str_9_to_numbers(data)
 
-    def _prefill_numbers(self, numbers: list[tuple[int, int, int]]) -> None:
-        """
-        Set the initial state of the digits.
-
-        Parameters
-        ----------
-        numbers: list[tuple[int, int, int]]
-            List with tuples, where every tuple denotes the (row, col, digit).
-
-        """
-        self.numbers = numbers
-        self.reset()
-
     def solve(self) -> bool:
         """
         Attempts to solve the puzzle.
@@ -120,10 +107,10 @@ class Sudoku:
             True if the puzzle has been solved succesfully.
         """
         tic = time.time()
-        status = self._solve(depth=0)
+        _status = self._solve(depth=0)
         toc = time.time()
         self.chrono = toc - tic
-        return status
+        return _status
 
     def reset(self):
         """
@@ -131,7 +118,7 @@ class Sudoku:
         """
         if self.verbose:
             print("reset")
-        self.grid = self._make_2D_grid()
+        self.grid = self._make_2d_grid()
         for i in self.numbers:
             self.grid[i[0]][i[1]] = i[2]
         self.history = []
@@ -149,22 +136,53 @@ class Sudoku:
         all_solved, _ = self._all_solved()
         return all_solved
 
+    def message_line(self, message: str) -> str:
+        """
+        Print a fancy message line, 80 columns wide.
+
+        Parameters
+        ----------
+        message: str
+            Message
+
+        Returns
+        -------
+        str
+            Formatted message as string.
+        """
+        line = f"\n---[ {message} ]"
+        line = line + "-" * (80 - len(line)) + "\n"
+        return line
+
     def _solve(self, depth) -> bool:
+        """
+        Recursive function. It searches for an empty cell and
+        fills in the first possible digit. Then it calls itself
+        to find the next empty cell. When it is stuck and cannot
+        fill in a possible digit, it unrolls to the point where it can
+        try another digit and starts recursing again from this
+        point.
+
+        Returns
+        -------
+        bool
+            True if it reaches a full solution
+        """
         if self.verbose:
             print(f"Depth: {depth: 4d}")
         for row in range(self.dim2):
             for col in range(self.dim2):
                 if self.grid[row][col] == 0:
-                    status = False
+                    _status = False
                     for digit in range(1, self.dim2 + 1):
                         if self._possible(row, col, digit):
                             self.grid[row][col] = digit
                             self.history.append((row, col, digit))
-                            status = self._solve(depth + 1)
-                            if not status:
+                            _status = self._solve(depth + 1)
+                            if not _status:
                                 self.grid[row][col] = 0
                                 self.history.append((row, col, 0))
-                    return status
+                    return _status
         return True
 
     def _possible(self, row: int, col: int, digit: int) -> bool:
@@ -183,17 +201,10 @@ class Sudoku:
         return True
 
     def __repr__(self) -> str:
-        return self._to_str()
-
-    def _to_str(self, show_prob: bool = False) -> str:
-        if show_prob:
-            grid = self.grid_p
-        else:
-            grid = self.grid
         out = ""
-        for row in range(len(grid)):
-            for col in range(len(grid[0])):
-                val = grid[row][col]
+        for row in range(len(self.grid)):
+            for col in range(len(self.grid[0])):
+                val = self.grid[row][col]
                 val = str(val) if val > 0 else "."
                 out += f"{val} "
                 if (col + 1) % (self.dim) == 0:
@@ -205,23 +216,36 @@ class Sudoku:
         return out
 
     def _all_solved(self) -> tuple[bool, int]:
-        status = True
-        checksum = 0
+        _status = True
+        _total_sum = 0
+        _checksum = 0
         for i in range(self.dim2):
-            checksum += i + 1
-        total_sum = 0
+            _checksum += i + 1
         for row in range(self.dim2):
             row_sum = 0
             for col in range(self.dim2):
                 row_sum += self.grid[row][col]
-            if row_sum != checksum:
-                status = False
-            total_sum += row_sum
-        return status, total_sum
+            if row_sum != _checksum:
+                _status = False
+            _total_sum += row_sum
+        return _status, _total_sum
 
-    def _make_2D_grid(self):
+    def _make_2d_grid(self):
         grid = [[0 for _ in range(self.dim2)] for _ in range(self.dim2)]
         return grid
+
+    def _prefill_numbers(self, numbers: list[tuple[int, int, int]]) -> None:
+        """
+        Set the initial state of the digits.
+
+        Parameters
+        ----------
+        numbers: list[tuple[int, int, int]]
+            List with tuples, where every tuple denotes the (row, col, digit).
+
+        """
+        self.numbers = numbers
+        self.reset()
 
     def _str_3_to_numbers(self, data):
         numbers = []
@@ -260,24 +284,6 @@ class Sudoku:
             str_lines.append(str_line)
         return str_lines
 
-    def message_line(self, message: str) -> str:
-        """
-        Print a fancy message line, 80 columns wide.
-
-        Parameters
-        ----------
-        message: str
-            Message
-
-        Returns
-        -------
-        str
-            Formatted message as string.
-        """
-        line = f"\n---[ {message} ]"
-        line = line + "-" * (80 - len(line)) + "\n"
-        return line
-
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(
@@ -290,9 +296,9 @@ if __name__ == "__main__":
 
     sudoku = Sudoku(9, verbose=args.verbose)
     sudoku.load(args.filename)
-    sudoku.message_line("start")
+    print()
+    print(sudoku.message_line("Sudoku solver, (C) 2022 Gilbert Francois Duivesteijn"))
     print(sudoku)
-    depth = 0
     status = sudoku.solve()
     if not status:
         print(sudoku.message_line("warning"))
@@ -302,6 +308,3 @@ if __name__ == "__main__":
     print(sudoku.message_line("statistics"))
     print(f"Chrono: {sudoku.chrono:0.9f} seconds")
     print(f"Number of steps: {len(sudoku.history)}")
-    # if args.verbose:
-    #     print(sudoku.message_line("history"))
-    #     print(sudoku.history)
