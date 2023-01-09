@@ -28,8 +28,7 @@ where filename points to the input file. Options are:
 | option  | Description |
 |---------|-------------|
 | -h      | Shows help message and exits.|
-| -s / --max-steps | Maximum number of steps to solve the puzzle. Default = 10000.  |
-| -v / --verbose   | Verbose output, showing history and elapsed computational time.|
+| -v / --verbose   | Verbose output, showing recursive depth.|
 
 ![Screenshot](resources/images/screenshot.png)
 
