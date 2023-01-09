@@ -1,4 +1,5 @@
 from unittest import TestCase
+
 from sudoku import Sudoku
 
 
@@ -59,4 +60,3 @@ class TestSudoku(TestCase):
             status, is_solved = solve_puzzle_from_file(filename)
             self.assertTrue(status)
             self.assertTrue(is_solved)
-
