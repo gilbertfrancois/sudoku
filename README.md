@@ -5,11 +5,11 @@ _Gilbert François Duivesteijn_
 
 This a terminal application that tries to solve your sudoku puzzle. It reads the initial state from a file and when
 it finds a solution, it prints the final state to the terminal. Note: the console output is VT100 compatible :)
-The implemented methods to solve the sudoku puzzles are not sophisticated yet. It is based on counting probabitities 
-and doing permutations when there are no deterministic solutions possible. The application in its current state can
-solve the _easy_ and _medium_ levels without problems. The _hard_ level is possible too, but it might need multiple runs
-to converge. In the near future, I'll plan to implement more advanced ways to solve the puzzles, which hopefully allows 
-the machine to solve the most difficult puzzles as well.
+The implemented method to solve the sudoku puzzles is quite simple. It searches for an empty cell and fills in the 
+first possible digit. Then it calls its own function to find the next possible digit. As soon as the solver is stuck,
+it unrolls to the previous state and tries the next possible number, until it has solved all cells in the puzzle.
+The application in its current state can solve the _easy_, _medium_, _hard_ and _expert_ levels without problems, if
+the puzzle has at least one valid solution.
 
 
 ## Installation and running
