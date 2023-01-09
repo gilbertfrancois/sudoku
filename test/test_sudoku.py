@@ -55,6 +55,8 @@ class TestSudoku(TestCase):
             "../examples/hard_002.txt",
             "../examples/expert_001.txt",
             "../examples/expert_002.txt",
+            "../examples/evil_001.txt",
+            "../examples/evil_002.txt",
         ]
         for filename in filenames:
             status, is_solved = solve_puzzle_from_file(filename)
