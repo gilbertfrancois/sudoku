@@ -1,4 +1,5 @@
 import argparse
+import math
 import os
 import random
 import time
@@ -17,18 +18,18 @@ class Sudoku:
 
     """
 
-    def __init__(self, dim: int, max_steps: int = 10000, verbose: bool = False):
-        self.dim: int = dim
-        self.dim2: int = dim**2
+    def __init__(self, dim2: int = 9, verbose: bool = False):
+        _dim = math.sqrt(dim2)
+        if int(_dim) ** 2 != dim2:
+            raise ValueError(f"Invalid value. {int(_dim)**2} != {dim2}.")
+        if dim2 not in [4, 9, 16]:
+            raise ValueError(f"Invalid dimension. Expected 4, 9, or 16, actual {dim2}.")
+        self.dim: int = int(_dim)
+        self.dim2: int = dim2
         self.numbers: list[tuple[int, int, int]] = []
         self.grid: list[list[int]] = []
-        self.grid_p: list[list[int]] = []
-        self.grid_c: list[list[list[int]]] = []
-        self.permutate: bool = False
         self.history: list[tuple[int, int, int]] = []
         self.chrono: float = 0.0
-        self.max_steps: int = max_steps
-        self.num_steps: int = 0
         self.verbose: bool = verbose
         self.reset()
 
@@ -81,7 +82,7 @@ class Sudoku:
         elif len(data[0]) == 9:
             self._str_9_to_numbers(data)
 
-    def prefill_numbers(self, numbers: list[tuple[int, int, int]]) -> None:
+    def _prefill_numbers(self, numbers: list[tuple[int, int, int]]) -> None:
         """
         Set the initial state of the digits.
 
@@ -103,31 +104,11 @@ class Sudoku:
         bool
             True if the puzzle has been solved succesfully.
         """
-        step = 0
-        prev_total_sum = -1
-        stuck_count = 0
-        all_solved = False
         tic = time.time()
-        while step < self.max_steps:
-            self._find_candidates()
-            self._sole_candidate()
-            all_solved, total_sum = self._all_solved()
-            if all_solved:
-                break
-            # No change since last iteration. Do a permutation...
-            if total_sum == prev_total_sum:
-                self.permutate = True
-                stuck_count += 1
-            # If permutations don't work in this state, reset and start again.
-            if stuck_count > 3:
-                stuck_count = 0
-                self.reset()
-            prev_total_sum = total_sum
-            step += 1
+        status = self._solve(depth=0)
         toc = time.time()
         self.chrono = toc - tic
-        self.num_steps = step
-        return self.is_solved()
+        return status
 
     def reset(self):
         """
@@ -136,11 +117,8 @@ class Sudoku:
         if self.verbose:
             print("reset")
         self.grid = self._make_2D_grid()
-        self.grid_p = self._make_2D_grid()
-        self.grid_c = self._make_3D_grid()
-        self.permutate = False
         for i in self.numbers:
-            self.grid[i[0] - 1][i[1] - 1] = i[2]
+            self.grid[i[0]][i[1]] = i[2]
         self.history = []
 
     def is_solved(self) -> bool:
@@ -156,56 +134,38 @@ class Sudoku:
         all_solved, _ = self._all_solved()
         return all_solved
 
-    def _find_candidates(self) -> None:
+    def _solve(self, depth) -> bool:
+        if self.verbose:
+            print(f"Depth: {depth: 4d}")
+        for row in range(self.dim2):
+            for col in range(self.dim2):
+                if self.grid[row][col] == 0:
+                    status = False
+                    for digit in range(1, self.dim2 + 1):
+                        if self._possible(row, col, digit):
+                            self.grid[row][col] = digit
+                            self.history.append((row, col, digit))
+                            status = self._solve(depth + 1)
+                            if not status:
+                                self.grid[row][col] = 0
+                                self.history.append((row, col, 0))
+                    return status
+        return True
+
+    def _possible(self, row: int, col: int, digit: int) -> bool:
         for i in range(self.dim2):
-            for j in range(self.dim2):
-                if self.grid[i][j] > 0:
-                    self.grid_p[i][j] = 0
-                    continue
-                for digit in range(1, self.dim2 + 1):
-                    # count the occurance of the digit in the row, col and 3x3 cell.
-                    _count = self._count_occurrance(digit, (i, j))
-                    if _count == 0:
-                        self.grid_c[i][j][digit-1] = 1
-                # Sum the possible digits from the candidates grid.
-                self.grid_p[i][j] = sum(self.grid_c[i][j])
-
-
-    def _sole_candidate(self) -> None:
-        for i in range(self.dim2):
-            for j in range(self.dim2):
-                # if self.grid[i][j] > 0:
-                #     self.grid_p[i][j] = 0
-                #     continue
-                # possibilities = []
-                # for value in range(1, self.dim2 + 1):
-                #     _count = self._count_occurrance(value, (i, j))
-                #     if _count == 0:
-                #         possibilities.append(value)
-                # self.grid_p[i][j] = len(possibilities)
-                # if len(possibilities) == 1:
-                    # self.grid[i][j] = possibilities[0]
-                
-                n_possibilities = sum(self.grid_c[i][j]) 
-                if n_possibilities == 1:
-                    possible_digits = [digit+1 for digit in range(self.dim2) if self.grid_c[i][j][digit] == 1]
-                    assert len(possible_digits) == 1
-                    self.grid[i][j] = possible_digits[0]
-                    # self.grid[i][j] = self.grid_c[i][j].index(1) + 1
-                    self.history.append((i+1, j+1, self.grid[i][j]))
-                # Todo: move to its own function
-                if self.permutate and n_possibilities == 2 and random.random() > 0.8:
-                    # breakpoint()
-                    possible_digits = [digit+1 for digit in range(self.dim2) if self.grid_c[i][j][digit] == 1]
-                    index = int(random.random() * 2)
-                    self.grid[i][j] = possible_digits[index]
-                    if (self.verbose):
-                        print(f"permutate: ({i+1}, {j+1})={self.grid[i][j]}")
-                    self.history.append((i+1, j+1, possible_digits[index]))
-                    self.permutate = False
-
-    def _unique_candidate(self) -> None:
-        pass
+            if self.grid[i][col] == digit:
+                return False
+        for j in range(self.dim2):
+            if self.grid[row][j] == digit:
+                return False
+        row0 = (row // self.dim) * self.dim
+        col0 = (col // self.dim) * self.dim
+        for i in range(self.dim):
+            for j in range(self.dim):
+                if self.grid[row0 + i][col0 + j] == digit:
+                    return False
+        return True
 
     def __repr__(self) -> str:
         return self._to_str()
@@ -228,7 +188,7 @@ class Sudoku:
             if row < 8 and (row + 1) % (self.dim) == 0:
                 out += "\n"
         return out
- 
+
     def _all_solved(self) -> tuple[bool, int]:
         status = True
         checksum = 0
@@ -248,35 +208,11 @@ class Sudoku:
         grid = [[0 for _ in range(self.dim2)] for _ in range(self.dim2)]
         return grid
 
-    def _make_3D_grid(self):
-        grid = [
-            [[0 for _ in range(self.dim2)] for _ in range(self.dim2)] for _ in range(9)
-        ]
-        return grid
-
-    def _count_occurrance(self, value: int, pos: tuple[int, int]):
-        count = 0
-        for col in range(self.dim2):
-            if self.grid[pos[0]][col] == value:
-                count += 1
-        for row in range(self.dim2):
-            if self.grid[row][pos[1]] == value:
-                count += 1
-        row_min = (pos[0] // self.dim) * self.dim
-        row_max = row_min + self.dim
-        col_min = (pos[1] // self.dim) * self.dim
-        col_max = col_min + self.dim
-        for row in range(row_min, row_max):
-            for col in range(col_min, col_max):
-                if self.grid[row][col] == value:
-                    count += 1
-        return count
-
     def _str_3_to_numbers(self, data):
         numbers = []
         for line in data:
-            numbers.append((int(line[0]), int(line[1]), int(line[2])))
-        self.prefill_numbers(numbers)
+            numbers.append((int(line[0] - 1), int(line[1] - 1), int(line[2])))
+        self._prefill_numbers(numbers)
 
     def _str_9_to_numbers(self, data):
         numbers = []
@@ -285,8 +221,8 @@ class Sudoku:
                 value = data[row][col]
                 if value in [".", "0", "_", "-", "x"]:
                     continue
-                numbers.append((row + 1, col + 1, int(value)))
-        self.prefill_numbers(numbers)
+                numbers.append((row, col, int(value)))
+        self._prefill_numbers(numbers)
 
     def _clean_input_data(self, data: list[str] | str) -> list[str]:
         if isinstance(data, str):
@@ -334,30 +270,23 @@ if __name__ == "__main__":
         description="Attempts to solve your Sudoku.",
     )
     parser.add_argument("filename", help="File path of the input data.")
-    parser.add_argument(
-        "-s",
-        "--max-steps",
-        required=False,
-        default=10000,
-        help="Maximum number of steps",
-    )
     parser.add_argument("-v", "--verbose", action="store_true", help="Verbose output")
     args = parser.parse_args()
 
-    sudoku = Sudoku(3, max_steps=args.max_steps, verbose=args.verbose)
+    sudoku = Sudoku(9, verbose=args.verbose)
     sudoku.load(args.filename)
     sudoku.message_line("start")
     print(sudoku)
+    depth = 0
     status = sudoku.solve()
     if not status:
         print(sudoku.message_line("warning"))
         print("Unable to find a solution.")
     print(sudoku.message_line("solution"))
     print(sudoku)
-    if args.verbose:
-        print(sudoku.message_line("history"))
-        print(sudoku.history)
-        print(sudoku.message_line("statistics"))
-        print(f"Chrono: {sudoku.chrono:0.3f} seconds")
-        print(f"Number of steps: {sudoku.num_steps}")
-        print(f"Number of fills: {len(sudoku.history)}")
+    print(sudoku.message_line("statistics"))
+    print(f"Chrono: {sudoku.chrono:0.9f} seconds")
+    print(f"Number of steps: {len(sudoku.history)}")
+    # if args.verbose:
+    #     print(sudoku.message_line("history"))
+    #     print(sudoku.history)
