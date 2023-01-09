@@ -94,7 +94,7 @@ class Sudoku:
         self.numbers = numbers
         self.reset()
 
-    def solve(self) -> bool:
+    def solve(self) -> None:
         """
         Attempts to solve the puzzle.
 
@@ -103,6 +103,31 @@ class Sudoku:
         bool
             True if the puzzle has been solved succesfully.
         """
+        for row in range(self.dim2):
+            for col in range(self.dim2):
+                if self.grid[row][col] == 0:
+                    for digit in range(1, self.dim2 + 1):
+                        if self.possible(row, col, digit):
+                            self.grid[row][col] = digit
+                            self.solve()
+                            self.grid[row][col] = 0
+                        return
+
+    def possible(self, row: int, col: int, digit: int) -> bool:
+        for i in range(self.dim2):
+            if self.grid[i][col] == digit:
+                return False
+        for j in range(self.dim2):
+            if self.grid[row][j] == digit:
+                return False
+        row0 = (row // self.dim) * self.dim
+        col0 = (col // self.dim) * self.dim
+        for i in range(self.dim):
+            for j in range(self.dim):
+                if self.grid[row0 + i][col0 + j] == digit:
+                    return False
+        return True
+
         step = 0
         prev_total_sum = -1
         stuck_count = 0
@@ -156,57 +181,6 @@ class Sudoku:
         all_solved, _ = self._all_solved()
         return all_solved
 
-    def _find_candidates(self) -> None:
-        for i in range(self.dim2):
-            for j in range(self.dim2):
-                if self.grid[i][j] > 0:
-                    self.grid_p[i][j] = 0
-                    continue
-                for digit in range(1, self.dim2 + 1):
-                    # count the occurance of the digit in the row, col and 3x3 cell.
-                    _count = self._count_occurrance(digit, (i, j))
-                    if _count == 0:
-                        self.grid_c[i][j][digit-1] = 1
-                # Sum the possible digits from the candidates grid.
-                self.grid_p[i][j] = sum(self.grid_c[i][j])
-
-
-    def _sole_candidate(self) -> None:
-        for i in range(self.dim2):
-            for j in range(self.dim2):
-                # if self.grid[i][j] > 0:
-                #     self.grid_p[i][j] = 0
-                #     continue
-                # possibilities = []
-                # for value in range(1, self.dim2 + 1):
-                #     _count = self._count_occurrance(value, (i, j))
-                #     if _count == 0:
-                #         possibilities.append(value)
-                # self.grid_p[i][j] = len(possibilities)
-                # if len(possibilities) == 1:
-                    # self.grid[i][j] = possibilities[0]
-                
-                n_possibilities = sum(self.grid_c[i][j]) 
-                if n_possibilities == 1:
-                    possible_digits = [digit+1 for digit in range(self.dim2) if self.grid_c[i][j][digit] == 1]
-                    assert len(possible_digits) == 1
-                    self.grid[i][j] = possible_digits[0]
-                    # self.grid[i][j] = self.grid_c[i][j].index(1) + 1
-                    self.history.append((i+1, j+1, self.grid[i][j]))
-                # Todo: move to its own function
-                if self.permutate and n_possibilities == 2 and random.random() > 0.8:
-                    # breakpoint()
-                    possible_digits = [digit+1 for digit in range(self.dim2) if self.grid_c[i][j][digit] == 1]
-                    index = int(random.random() * 2)
-                    self.grid[i][j] = possible_digits[index]
-                    if (self.verbose):
-                        print(f"permutate: ({i+1}, {j+1})={self.grid[i][j]}")
-                    self.history.append((i+1, j+1, possible_digits[index]))
-                    self.permutate = False
-
-    def _unique_candidate(self) -> None:
-        pass
-
     def __repr__(self) -> str:
         return self._to_str()
 
@@ -228,7 +202,7 @@ class Sudoku:
             if row < 8 and (row + 1) % (self.dim) == 0:
                 out += "\n"
         return out
- 
+
     def _all_solved(self) -> tuple[bool, int]:
         status = True
         checksum = 0
