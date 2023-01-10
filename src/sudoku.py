@@ -1,24 +1,25 @@
-# Sudoku solver
-# Copyright (C) 2022  Gilbert Francois Duivesteijn
+"""
+Sudoku Solver
+Copyright (C) 2022  Gilbert Francois Duivesteijn
 
-# This program is free software: you can redistribute it and/or modify
-# it under the terms of the GNU General Public License as published by
-# the Free Software Foundation, either version 3 of the License, or
-# (at your option) any later version.
+This program is free software: you can redistribute it and/or modify
+it under the terms of the GNU General Public License as published by
+the Free Software Foundation, either version 3 of the License, or
+(at your option) any later version.
 
-# This program is distributed in the hope that it will be useful,
-# but WITHOUT ANY WARRANTY; without even the implied warranty of
-# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-# GNU General Public License for more details.
+This program is distributed in the hope that it will be useful,
+but WITHOUT ANY WARRANTY; without even the implied warranty of
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+GNU General Public License for more details.
 
-# You should have received a copy of the GNU General Public License
-# along with this program.  If not, see <https://www.gnu.org/licenses/>.
+You should have received a copy of the GNU General Public License
+along with this program.  If not, see <https://www.gnu.org/licenses/>.
+"""
 
 import argparse
 import math
 import os
 import time
-
 from typing import Optional
 
 
@@ -46,7 +47,6 @@ class Sudoku:
         self.numbers: list[tuple[int, int, int]] = []
         self.grid: list[list[int]] = []
         self.all_solutions: list[list[list[int]]] = []
-        self.history: list[tuple[int, int, int]] = []
         self.chrono: float = 0.0
         self.verbose: bool = verbose
         self.reset()
@@ -115,9 +115,9 @@ class Sudoku:
         self.chrono = toc - tic
         return len(self.all_solutions)
 
-    def reset(self, numbers: Optional[list[tuple[int, int, int]]]=None):
+    def reset(self, numbers: Optional[list[tuple[int, int, int]]] = None):
         """
-        Resets the puzzle to its initial state and clears the history.
+        Resets the puzzle to its initial state.
 
         Parameters
         ----------
@@ -132,7 +132,6 @@ class Sudoku:
         self.grid = self._make_2d_grid()
         for i in self.numbers:
             self.grid[i[0]][i[1]] = i[2]
-        self.history = []
 
     def is_solved(self) -> bool:
         """
@@ -144,8 +143,7 @@ class Sudoku:
         bool
             True if the puzzle has been solved.
         """
-        all_solved, _ = self._all_solved()
-        return all_solved
+        return len(self.all_solutions) > 0
 
     def message_line(self, message: str) -> str:
         """
@@ -165,7 +163,7 @@ class Sudoku:
         line = line + "-" * (80 - len(line)) + "\n"
         return line
 
-    def _solve(self, depth: int) -> bool:
+    def _solve(self, depth: int) -> None:
         """
         Recursive function. It searches for an empty cell and
         fills in the first possible digit. Then it calls itself
@@ -179,26 +177,19 @@ class Sudoku:
         depth: int
             Recursive depth, used for verbose output only.
 
-        Returns
-        -------
-        bool
-            True if it reaches a full solution
         """
         if self.verbose:
             print(f"Depth: {depth: 4d}")
         for row in range(self.dim2):
             for col in range(self.dim2):
                 if self.grid[row][col] == 0:
-                    _status = False
                     for digit in range(1, self.dim2 + 1):
                         if self._possible(row, col, digit):
                             self.grid[row][col] = digit
-                            # self.history.append((row, col, digit))
                             self._solve(depth + 1)
                             self.grid[row][col] = 0
-                            # self.history.append((row, col, 0))
-                    return _status
-        if self.is_solved():
+                    return
+        if self._all_solved():
             self.all_solutions.append(self._copy_grid(self.grid))
 
     def _possible(self, row: int, col: int, digit: int) -> bool:
@@ -223,8 +214,8 @@ class Sudoku:
         elif len(self.all_solutions) > 1:
             return f"Iterate sudoku.all_grids to see all {len(self.all_solutions)} solutions."
         out = ""
-        for row in range(len(grid)):
-            for col in range(len(grid[row])):
+        for row in range(self.dim2):
+            for col in range(self.dim2):
                 val = grid[row][col]
                 val = str(val) if val > 0 else "."
                 out += f"{val} "
@@ -236,7 +227,7 @@ class Sudoku:
                 out += "\n"
         return out
 
-    def _all_solved(self) -> tuple[bool, int]:
+    def _all_solved(self) -> bool:
         _status = True
         _total_sum = 0
         _checksum = 0
@@ -249,7 +240,7 @@ class Sudoku:
             if row_sum != _checksum:
                 _status = False
             _total_sum += row_sum
-        return _status, _total_sum
+        return _status
 
     def _make_2d_grid(self) -> list[list[int]]:
         grid = [[0 for _ in range(self.dim2)] for _ in range(self.dim2)]
@@ -294,12 +285,10 @@ class Sudoku:
 
     def _copy_grid(self, src: list[list[int]]) -> list[list[int]]:
         dst = self._make_2d_grid()
-        for i in range(len(src)):
-            for j in range(len(src)):
+        for i in range(self.dim2):
+            for j in range(self.dim2):
                 dst[i][j] = src[i][j]
         return dst
-                
-                
 
 
 if __name__ == "__main__":
@@ -313,18 +302,16 @@ if __name__ == "__main__":
 
     sudoku = Sudoku(9, verbose=args.verbose)
     sudoku.load(args.filename)
-    print()
     print(sudoku.message_line("Sudoku solver, (C) 2022 Gilbert Francois Duivesteijn"))
     print(sudoku)
-    num_solutions = sudoku.solve()
-    if num_solutions == 0:
+    NUM_SOLUTIONS = sudoku.solve()
+    if NUM_SOLUTIONS == 0:
         print(sudoku.message_line("warning"))
         print("Unable to find a solution.")
     print(sudoku.message_line("solution"))
     print(sudoku)
     print(sudoku.message_line("statistics"))
-    print(f"Solution is unique: {num_solutions == 1}")
-    if num_solutions > 1:
-        print(f"Number of possible solutions: {num_solutions}")
-    print(f"Chrono: {sudoku.chrono:0.9f} seconds")
-    # print(f"Number of steps: {len(sudoku.history)}")
+    print(f"Solution is unique: {NUM_SOLUTIONS == 1}")
+    if NUM_SOLUTIONS > 1:
+        print(f"Number of possible solutions: {NUM_SOLUTIONS}")
+    print(f"Chrono: {sudoku.chrono:0.4f} seconds")
