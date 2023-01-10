@@ -45,6 +45,7 @@ class Sudoku:
         self.dim2: int = dim2
         self.numbers: list[tuple[int, int, int]] = []
         self.grid: list[list[int]] = []
+        self.all_solutions: list[list[list[int]]] = []
         self.history: list[tuple[int, int, int]] = []
         self.chrono: float = 0.0
         self.verbose: bool = verbose
@@ -99,7 +100,7 @@ class Sudoku:
         elif len(data[0]) == 9:
             self._str_9_to_numbers(data)
 
-    def solve(self) -> bool:
+    def solve(self) -> int:
         """
         Attempts to solve the puzzle.
 
@@ -109,10 +110,10 @@ class Sudoku:
             True if the puzzle has been solved succesfully.
         """
         tic = time.time()
-        _status = self._solve(depth=0)
+        self._solve(depth=0)
         toc = time.time()
         self.chrono = toc - tic
-        return _status
+        return len(self.all_solutions)
 
     def reset(self, numbers: Optional[list[tuple[int, int, int]]]=None):
         """
@@ -192,13 +193,13 @@ class Sudoku:
                     for digit in range(1, self.dim2 + 1):
                         if self._possible(row, col, digit):
                             self.grid[row][col] = digit
-                            self.history.append((row, col, digit))
-                            _status = self._solve(depth + 1)
-                            if not _status:
-                                self.grid[row][col] = 0
-                                self.history.append((row, col, 0))
+                            # self.history.append((row, col, digit))
+                            self._solve(depth + 1)
+                            self.grid[row][col] = 0
+                            # self.history.append((row, col, 0))
                     return _status
-        return True
+        if self.is_solved():
+            self.all_solutions.append(self._copy_grid(self.grid))
 
     def _possible(self, row: int, col: int, digit: int) -> bool:
         for i in range(self.dim2):
@@ -216,10 +217,15 @@ class Sudoku:
         return True
 
     def __repr__(self) -> str:
+        grid = self.grid
+        if len(self.all_solutions) == 1:
+            grid = self.all_solutions[0]
+        elif len(self.all_solutions) > 1:
+            return f"Iterate sudoku.all_grids to see all {len(self.all_solutions)} solutions."
         out = ""
-        for row in range(len(self.grid)):
-            for col in range(len(self.grid[0])):
-                val = self.grid[row][col]
+        for row in range(len(grid)):
+            for col in range(len(grid[row])):
+                val = grid[row][col]
                 val = str(val) if val > 0 else "."
                 out += f"{val} "
                 if (col + 1) % (self.dim) == 0:
@@ -286,6 +292,15 @@ class Sudoku:
             str_lines.append(str_line)
         return str_lines
 
+    def _copy_grid(self, src: list[list[int]]) -> list[list[int]]:
+        dst = self._make_2d_grid()
+        for i in range(len(src)):
+            for j in range(len(src)):
+                dst[i][j] = src[i][j]
+        return dst
+                
+                
+
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(
@@ -301,12 +316,15 @@ if __name__ == "__main__":
     print()
     print(sudoku.message_line("Sudoku solver, (C) 2022 Gilbert Francois Duivesteijn"))
     print(sudoku)
-    status = sudoku.solve()
-    if not status:
+    num_solutions = sudoku.solve()
+    if num_solutions == 0:
         print(sudoku.message_line("warning"))
         print("Unable to find a solution.")
     print(sudoku.message_line("solution"))
     print(sudoku)
     print(sudoku.message_line("statistics"))
+    print(f"Solution is unique: {num_solutions == 1}")
+    if num_solutions > 1:
+        print(f"Number of possible solutions: {num_solutions}")
     print(f"Chrono: {sudoku.chrono:0.9f} seconds")
-    print(f"Number of steps: {len(sudoku.history)}")
+    # print(f"Number of steps: {len(sudoku.history)}")
