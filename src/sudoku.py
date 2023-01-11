@@ -91,7 +91,7 @@ class Sudoku:
 
         """
         if not os.path.exists(filepath):
-            raise FileExistsError(f"File {filepath} does not exist.")
+            raise FileNotFoundError(f"File {filepath} does not exist.")
         with open(filepath, "r", encoding="utf-8") as file:
             data = file.read()
         data = self._clean_input_data(data)
@@ -160,7 +160,7 @@ class Sudoku:
             Formatted message as string.
         """
         line = f"\n---[ {message} ]"
-        line = line + "-" * (80 - len(line)) + "\n"
+        line = line + "-" * (79 - len(line)) + "\n"
         return line
 
     def _solve(self, depth: int) -> None:

@@ -1,9 +1,10 @@
 from unittest import TestCase
+import pytest
 
 from sudoku import Sudoku
 
 
-def solve_puzzle_from_file(filename: str) -> tuple[bool, bool]:
+def solve_puzzle_from_file(filename: str) -> tuple[int, bool]:
     sudoku = Sudoku()
     sudoku.load(filename)
     num_solutions = sudoku.solve()
@@ -12,6 +13,69 @@ def solve_puzzle_from_file(filename: str) -> tuple[bool, bool]:
 
 
 class TestSudoku(TestCase):
+    def test_filenotfound_exception(self):
+        sudoku = Sudoku()
+        with pytest.raises(FileNotFoundError) as exc_info:
+            sudoku.load("doesnotexist.txt")
+        exception_raised = exc_info.value
+        print(exception_raised)
+
+    def test_wrong_dim_exception_1(self):
+        with pytest.raises(ValueError) as exc_info:
+            _ = Sudoku(25)
+        exception_raised = exc_info.value
+        self.assertEqual(
+            "Invalid dimension. Expected 4, 9, or 16, actual 25.",
+            exception_raised.__str__(),
+        )
+
+    def test_wrong_dim_exception_2(self):
+        with pytest.raises(ValueError) as exc_info:
+            _ = Sudoku(10)
+        exception_raised = exc_info.value
+        self.assertEqual("Invalid value. 9 != 10.", exception_raised.__str__())
+
+    def test_verbose(self):
+        sudoku = Sudoku(verbose=True)
+        sudoku.load("../examples/easy_001.txt")
+        sudoku.reset()
+        sudoku.solve()
+        sudoku.is_solved()
+
+    def test_reset(self):
+        sudoku = Sudoku()
+        sudoku.load("../examples/easy_001.txt")
+        grid1 = sudoku._copy_grid(sudoku.grid)
+        sudoku.solve()
+        sudoku.reset()
+        grid2 = sudoku._copy_grid(sudoku.grid)
+        for i in range(len(grid1)):
+            for j in range(len(grid1[i])):
+                self.assertEqual(grid1[i][j], grid2[i][j])
+
+    def test_init_repr_(self):
+        sudoku = Sudoku()
+        sudoku.load("../examples/easy_001.txt")
+        out = sudoku.__repr__()
+        self.assertTrue(isinstance(out, str))
+        self.assertTrue("." in out)
+
+    def test_solved_repr_(self):
+        sudoku = Sudoku()
+        sudoku.load("../examples/easy_001.txt")
+        sudoku.solve()
+        out = sudoku.__repr__()
+        self.assertTrue(isinstance(out, str))
+        self.assertFalse("." in out)
+
+    def test_message_line(self):
+        sudoku = Sudoku()
+        out = sudoku.message_line("123")
+        self.assertTrue(isinstance(out, str))
+        self.assertEqual(len(out), 80)
+        out = sudoku.message_line("1234567890")
+        self.assertEqual(len(out), 80)
+
     def test_grid(self):
         sudoku = Sudoku()
         sudoku.load("../examples/easy_003.txt")
