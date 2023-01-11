@@ -83,20 +83,52 @@ Your code has been rated at 10.00/10 (previous run: 10.00/10, +0.00)
 $ pytest test_sudoku.py -v
 ============================= test session starts ==============================
 platform darwin -- Python 3.10.9, pytest-7.2.0, pluggy-1.0.0 -- 
-collected 11 items
+collected 19 items
 
-test_sudoku.py::TestSudoku::test_cell_possible_false PASSED              [  9%]
-test_sudoku.py::TestSudoku::test_cell_possible_true PASSED               [ 18%]
-test_sudoku.py::TestSudoku::test_easy PASSED                             [ 27%]
-test_sudoku.py::TestSudoku::test_evil PASSED                             [ 36%]
-test_sudoku.py::TestSudoku::test_expert PASSED                           [ 45%]
-test_sudoku.py::TestSudoku::test_grid PASSED                             [ 54%]
-test_sudoku.py::TestSudoku::test_hard PASSED                             [ 63%]
-test_sudoku.py::TestSudoku::test_medium PASSED                           [ 72%]
-test_sudoku.py::TestSudoku::test_non_unique PASSED                       [ 81%]
-test_sudoku.py::TestSudoku::test_possible_false PASSED                   [ 90%]
-test_sudoku.py::TestSudoku::test_possible_true PASSED                    [100%]
+test_sudoku.py::TestSudoku::test_cell_possible_false PASSED              [  5%]
+test_sudoku.py::TestSudoku::test_cell_possible_true PASSED               [ 10%]
+test_sudoku.py::TestSudoku::test_easy PASSED                             [ 15%]
+test_sudoku.py::TestSudoku::test_evil PASSED                             [ 21%]
+test_sudoku.py::TestSudoku::test_expert PASSED                           [ 26%]
+test_sudoku.py::TestSudoku::test_filenotfound_exception PASSED           [ 31%]
+test_sudoku.py::TestSudoku::test_grid PASSED                             [ 36%]
+test_sudoku.py::TestSudoku::test_hard PASSED                             [ 42%]
+test_sudoku.py::TestSudoku::test_init_repr_ PASSED                       [ 47%]
+test_sudoku.py::TestSudoku::test_medium PASSED                           [ 52%]
+test_sudoku.py::TestSudoku::test_message_line PASSED                     [ 57%]
+test_sudoku.py::TestSudoku::test_non_unique PASSED                       [ 63%]
+test_sudoku.py::TestSudoku::test_possible_false PASSED                   [ 68%]
+test_sudoku.py::TestSudoku::test_possible_true PASSED                    [ 73%]
+test_sudoku.py::TestSudoku::test_reset PASSED                            [ 78%]
+test_sudoku.py::TestSudoku::test_solved_repr_ PASSED                     [ 84%]
+test_sudoku.py::TestSudoku::test_verbose PASSED                          [ 89%]
+test_sudoku.py::TestSudoku::test_wrong_dim_exception_1 PASSED            [ 94%]
+test_sudoku.py::TestSudoku::test_wrong_dim_exception_2 PASSED            [100%]
 
-============================= 11 passed in 12.34s ==============================
+============================= 19 passed in 41.48s ==============================
 
 ```
+-  [Coverage](https://coverage.readthedocs.io/en/7.0.4/)
+
+```
+Name            Stmts   Miss  Cover
+-----------------------------------
+src/sudoku.py     171     15    91%
+-----------------------------------
+TOTAL             171     15    91%
+
+```
+
+- Test  [Coverage](https://coverage.readthedocs.io/en/7.0.4/)
+
+```
+coverage report
+Name                                                  Stmts   Miss  Cover
+-------------------------------------------------------------------------
+src/sudoku.py                                           171     28    84%
+test/test_sudoku.py                                     125      0   100%
+-------------------------------------------------------------------------
+TOTAL                                                   296     28    91%
+
+```
+
