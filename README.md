@@ -3,33 +3,61 @@ _Gilbert François Duivesteijn_
 
 ## Abstract
 
-This a terminal application that tries to solve your sudoku puzzle. It reads the initial state from a file and when it finds a unique solution, it prints the final state to the terminal. 
-
-The implemented method to solve the sudoku puzzles is quite simple. It searches for an empty cell and fills in the first possible digit. Then it calls its own function to find the next possible digit. As soon as the solver is stuck, it unrolls to the previous state and tries the next possible number, until it has solved all cells in the puzzle. The application in its current state can solve the _easy_, _medium_, _hard_, _expert_ and _evil_ levels without problems. Moreover, when the puzzle has a non-unique solution, it finds all possible solutions!
+This a terminal application that solves all your sudoku puzzles. It reads the initial state from a file and solves the puzzle. The implemented method to solve the sudoku puzzles is as simple as beautiful. It searches for an empty cell and fills in the first possible digit. Then it calls its own function to find the next possible digit. As soon as the solver is stuck, it unrolls to the previous state and tries the next possible number, until it has solved all cells in the puzzle. The application in its current state can solve the _easy_, _medium_, _hard_, _expert_ and _evil_ levels without problems. Moreover, when the puzzle has a non-unique solution, it finds all possible solutions!
 
 
-## Installation and running
 
-Install python version 3.10 or higher.
+There are 2 versions of this program. One written in **C** and one in **Python**. *The C version is approximately 40 to 80 times faster.*
+
+| ![Screenshot Python](./resources/images/screenshot-py.png) | ![Screenshot Python](./resources/images/screenshot-c.png) |
+| ---------------------------------------------------------- | --------------------------------------------------------- |
+| Python version, runtime: 0.00265 seconds.                  | C version, runtime: 0.00006 seconds.                      |
+
+
+
+
+## Building and running the C version
+
+Compile the program with:
+
+```sh
+cd cc
+mkdir build
+cd build
+cmake .. -DCMAKE_BUILD_TYPE=Release
+make
+```
+
+
 
 Run the program with:
 
 ```sh
-python sudoku [options] <filename>
+./sudoku <filename>
+
+# example
+./sudoku ../../examples/easy_001.txt
 ```
-where filename points to the input file. Options are:
 
-| option  | Description |
-|---------|-------------|
-| -h      | Shows help message and exits.|
-| -v / --verbose   | Verbose output, showing recursive depth.|
 
-![Screenshot](resources/images/screenshot.png)
+
+## Running the python version
+
+Install Python version 3.10 or higher. Run the program with:
+
+```sh
+cd py/src/
+python sudoku <filename>
+
+# example
+python sudoku ../../examples/easy_001.txt
+```
+
+
 
 ## Data file format
 
-The input file can have 2 different formats: grid format or list format. The grid format
-expects the digits in 9 by 9 grid, where the empty cells are denoted by a dot. 
+The input file can have 2 different formats: grid format or list format. The grid format expects the digits in 9 by 9 grid, where the empty cells are denoted by a dot. 
 
 ```
 .9. .1. ..7
@@ -44,24 +72,23 @@ expects the digits in 9 by 9 grid, where the empty cells are denoted by a dot.
 ..2 ..8 1..
 .8. .5. 3..
 ```
-Adding spaces or white lines is allowed.
-
-The list format consists of a list with digits and its position as `row col digit`, e.g.:
-```
-# row col digit
-1 2 9
-1 5 1
-1 9 7
-2 3 5 
-2 4 7
-(.... etc)
-
-```
 There are some example data files in the `examples` folder.
+
+
 
 ## Nerd section
 
-Besides building a very robust solver, much effort has been put in making beautiful pure python code.  It was a explicit choice to write the program in plain python, without any external libraries, like numpy. Although it could be more efficient with numpy, the code looks much closer to a plain C implementation and can be used as a guide for writing a C or ASM version in the future.
+
+
+### C
+
+To do...
+
+
+
+### Python
+
+Besides building a very robust solver, much effort has been put in making beautiful pure python code.  It was a explicit choice to write the program in plain python, without any external libraries, like numpy.
 
 The application has been developed with the following code quality tools:
 

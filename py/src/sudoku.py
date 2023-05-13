@@ -1,6 +1,6 @@
 """
 Sudoku Solver
-Copyright (C) 2022  Gilbert Francois Duivesteijn
+Copyright (C) 2023  Gilbert Francois Duivesteijn
 
 This program is free software: you can redistribute it and/or modify
 it under the terms of the GNU General Public License as published by
@@ -302,7 +302,7 @@ if __name__ == "__main__":
 
     sudoku = Sudoku(9, verbose=args.verbose)
     sudoku.load(args.filename)
-    print(sudoku.message_line("Sudoku solver, (C) 2022 Gilbert Francois Duivesteijn"))
+    print(sudoku.message_line("Sudoku solver, (C) 2023 Gilbert Francois Duivesteijn"))
     print(sudoku)
     NUM_SOLUTIONS = sudoku.solve()
     if NUM_SOLUTIONS == 0:
@@ -314,4 +314,4 @@ if __name__ == "__main__":
     print(f"Solution is unique: {NUM_SOLUTIONS == 1}")
     if NUM_SOLUTIONS > 1:
         print(f"Number of possible solutions: {NUM_SOLUTIONS}")
-    print(f"Chrono: {sudoku.chrono:0.4f} seconds")
+    print(f"Chrono: {sudoku.chrono:0.5f} seconds")

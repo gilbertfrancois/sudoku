@@ -204,3 +204,4 @@ node-modules/
 components/web_frontend/node_modules/
 components/web_backend/log/
 components/web_backend/sessions/
+build
