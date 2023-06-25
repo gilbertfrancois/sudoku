@@ -48,18 +48,13 @@ int sudoku_init(Sudoku *s, char *filename) {
 
 void sudoku_append_solution(Sudoku *s) {
     s->n_solutions = s->n_solutions + 1;
-    NDArray *new_solutions = (NDArray *)malloc(sizeof(NDArray) * s->n_solutions);
-    for (int i = 0; i < s->n_solutions - 1; i++) {
-        ndarray_copy(&new_solutions[i], &(s->solutions[i]));
+    if (s->n_solutions == 1) {
+        s->solutions = (NDArray *)malloc(sizeof(NDArray) * s->n_solutions);
     }
-    ndarray_copy(&new_solutions[s->n_solutions - 1], s->grid);
-    if (s->n_solutions > 1) {
-        for (int i = 0; i < s->n_solutions - 1; i++) {
-            ndarray_free(&(s->solutions[i]));
-        }
-        free(s->solutions);
+    else {
+        s->solutions = (NDArray *)realloc(s->solutions, sizeof(NDArray) * s->n_solutions);
     }
-    s->solutions = new_solutions;
+    ndarray_copy(&(s->solutions[s->n_solutions - 1]), s->grid);
 }
 
 void sudoku_free(Sudoku *s) {
