@@ -22,10 +22,9 @@ Compile the program with:
 
 ```sh
 cd cc
-mkdir build
-cd build
-cmake .. -DCMAKE_BUILD_TYPE=Release
-make
+cmake -B build -S . -DCMAKE_BUILD_TYPE=Release
+cmake --build build
+cmake --install build
 ```
 
 
@@ -33,6 +32,7 @@ make
 Run the program with:
 
 ```sh
+cd dist
 ./sudoku <filename>
 
 # example
