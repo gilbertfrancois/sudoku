@@ -148,8 +148,3 @@ void test_4D() {
     }
     ndarray_print(array);
 }
-//
-// int main(int argc, char *argv[]) {
-//     test_2D();
-//     return 0;
-// }
