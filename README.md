@@ -47,10 +47,10 @@ Install Python version 3.10 or higher. Run the program with:
 
 ```sh
 cd py/src/
-python sudoku <filename>
+python sudoku.py <filename>
 
 # example
-python sudoku ../../examples/easy_001.txt
+python sudoku.py ../../examples/easy_001.txt
 ```
 
 
